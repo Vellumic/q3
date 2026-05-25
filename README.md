@@ -1,4 +1,4 @@
-Q³ ![Build Status](https://travis-ci.org/jeaye/q3.png)
+Q³
 ===
 (**NOTE**: q3 should build on Rust f4bedde)
 ![Screenshot](pics/012_1_no_wire.png)
