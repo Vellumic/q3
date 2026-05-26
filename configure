@@ -11,7 +11,7 @@
 
 # Re-invoke the configure script
 # and keep the output at bay.
-if [ $# -ne 1 -o "$1" != "quiet" ];
+if [ $# -ne 1 ] || [ "$1" != "quiet" ];
 then
   $0 "quiet" > /dev/null
   exit $?
@@ -74,11 +74,11 @@ then
 fi
 
 # BWD is the build directory
-BWD=$PWD/build 
+BWD=$PWD/build
 log "Build directory: $BWD"
 
 # SWD is the source directory
-SWD=$(cd $(dirname $0) && pwd) 
+SWD=$(cd $(dirname $0) && pwd)
 log "Source directory: $SWD"
 
 function readlink() {
@@ -130,7 +130,7 @@ pushd glfw_shared
     make clean
     make glfw
 
-    if [ "1" -eq "$UNAME_LINUX" -o "1" -eq "$UNAME_CYGWIN" ];
+    if [ "1" -eq "$UNAME_LINUX" ] || [ "1" -eq "$UNAME_CYGWIN" ];
     then
       # Linux
       cp src/libglfw.so $BWD/../
@@ -157,7 +157,7 @@ pushd glfw-rs
     $SWD/bin/rustpkg clean glfw
     $SWD/bin/rustpkg build glfw
 
-    if [ "0" -eq "$UNAME_LINUX" -o "0" -eq "$UNAME_CYGWIN" ];
+    if [ "0" -eq "$UNAME_LINUX" ] || [ "0" -eq "$UNAME_CYGWIN" ];
     then
       # Linux
       rm -f $BWD/../libglfw-*.so
@@ -190,7 +190,7 @@ mkdir -p gl-rs
 pushd $SWD/lib/gl-rs
   rustpkg clean gl
   rustpkg build --opt-level=3 gl
-  if [ "0" -eq "$UNAME_LINUX" -o "0" -eq "$UNAME_CYGWIN" ];
+  if [ "0" -eq "$UNAME_LINUX" ] || [ "0" -eq "$UNAME_CYGWIN" ];
   then
     # Linux
     rm -f $BWD/../libgl-*.so
@@ -216,7 +216,7 @@ pushd stb-image
   make -B
 popd
 
-## STB-Image
+## Rust ncurses
 log "Building ncurses-rs"
 mkdir -p ncurses-rs
 pushd ncurses-rs
@@ -231,7 +231,7 @@ popd
 cd .. # Back to the original invoking directory
 
 # Move over the make file
-sed "s#%PROJ_DIR%#${SWD}#" $SWD/Makefile.stub > Makefile 
+sed "s#%PROJ_DIR%#${SWD}#" $SWD/Makefile.stub > Makefile
 
 readlink $SWD/build
 swd_link=$link_res
@@ -247,4 +247,3 @@ fi
 find . -maxdepth 1 -type f -name '.build_*' | grep -v git | xargs rm -f || true
 
 log "Done configuring Q³."
-
