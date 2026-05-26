@@ -24,8 +24,7 @@ Q³ is not a game yet! It's still a side project that I'm working on in my spare
 * [Documentation on a wiki](https://github.com/jeaye/q3/wiki)
 
 ### How do I get Q³ running on my system?
-I run on the (nearly) latest Rust master; I generally pull every few days. Q³ currently has 
-[glfw3](https://github.com/glfw/glfw), 
+I run on the (nearly) latest Rust master; I generally pull every few days. Q³ currently has
 [glfw-rs](https://github.com/jeaye/glfw-rs), 
 [rust-opengles](https://github.com/jeaye/rust-opengles),
 [rust-stb-image](https://github.com/mozilla-servo/rust-stb-image), and

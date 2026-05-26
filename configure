@@ -107,45 +107,6 @@ pushd rust
 popd
 PATH=$SWD/bin:$PATH
 
-## Build GLFW3 (doesn't support out of source builds)
-mkdir -p glfw_static glfw_shared
-
-# Static
-log "Building glfw_static"
-pushd glfw_static
-  cmake $SWD/lib/glfw/CMakeLists.txt -DBUILD_SHARED_LIBS=OFF
-  pushd $SWD/lib/glfw
-    make clean
-    make glfw
-    cp src/libglfw3.a $BWD/glfw_static
-    ln -sf $BWD/glfw_static/libglfw3.a $BWD/glfw_static/libglfw.a
-  popd
-popd
-
-# Dynamic
-log "Building glfw_shared"
-pushd glfw_shared
-  cmake $SWD/lib/glfw/CMakeLists.txt -DBUILD_SHARED_LIBS=ON
-  pushd $SWD/lib/glfw
-    make clean
-    make glfw
-
-    if [ "1" -eq "$UNAME_LINUX" ] || [ "1" -eq "$UNAME_CYGWIN" ];
-    then
-      # Linux
-      cp src/libglfw.so $BWD/../
-      ln -sf $BWD/../libglfw.so $BWD/../libglfw.so.3
-      ln -sf $BWD/../libglfw.so $BWD/../libglfw.so.3.0
-    elif [ "1" -eq "$UNAME_OSX" ];
-    then
-      # Mac
-      cp src/libglfw.3.0.dylib $BWD/../
-      ln -sf $BWD/../libglfw.3.0.dylib $BWD/../libglfw.3.dylib
-      ln -sf $BWD/../libglfw.3.0.dylib $BWD/../libglfw.dylib
-    fi
-  popd
-popd
-
 ## GLFW3 Rust
 log "Building glfw-rs"
 mkdir -p glfw-rs
