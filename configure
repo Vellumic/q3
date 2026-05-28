@@ -90,7 +90,7 @@ function readlink() {
 # Update submodules
 log "Updating submodules"
 pushd $SWD
-  git submodule update --recursive --init
+  git submodule update --recursive --init --depth=1
 popd
 
 # Clean up any previous build data
@@ -99,11 +99,13 @@ mkdir -p build
 cd build
 
 ## Rust
-log "Building rust (will be a while)"
+log "Building rust (will be a while, build log can be found in $BWD/rust)"
 mkdir -p rust
 pushd rust
-  sh $SWD/lib/rust/configure --prefix=$SWD
-  make -j8 && make install
+  sed -i 's#CFLAGS=\$LLVM_CFLAGS$#CFLAGS="\$LLVM_CFLAGS -std=gnu99"#' $SWD/lib/rust/configure
+  sed -i 's#CFG_GCCISH_CFLAGS :=$#CFG_GCCISH_CFLAGS := -w#' $SWD/lib/rust/Makefile.in
+  sh $SWD/lib/rust/configure --prefix=$SWD > build_log.txt 2>&1
+  { make -j8 && make install; } >> build_log.txt 2>&1
 popd
 PATH=$SWD/bin:$PATH
 
@@ -140,6 +142,7 @@ popd
 log "Building rust-opengles"
 mkdir -p rust-opengles
 pushd rust-opengles
+  sed -i "s#sys#mem#" $SWD/lib/rust-opengles/gl2.rs
   sh $SWD/lib/rust-opengles/configure
   make clean
   make -B
