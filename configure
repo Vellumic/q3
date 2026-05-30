@@ -11,8 +11,7 @@
 
 # Re-invoke the configure script
 # and keep the output at bay.
-if [ $# -ne 1 ] || [ "$1" != "quiet" ];
-then
+if [[ $# != 1 || $1 != "quiet" ]]; then
   $0 "quiet" > /dev/null
   exit $?
 fi
@@ -23,21 +22,9 @@ set -o errexit
 set -o nounset
 
 # Determine system
-UNAME_LINUX=0
-UNAME_CYGWIN=0
-UNAME_OSX=0
-UNAME=$(uname)
-if [ "$UNAME" = "Linux" ];
-then
-  UNAME_LINUX=1
-elif [ "$UNAME" = "Darwin" ];
-then
-  UNAME_OSX=1
-elif [ "$(uname -o)" = "Cygwin" ];
-then
-  UNAME_CYGWIN=1
-else
-  echo "Invalid uname ($UNAME): Unsuppported platform" 1>&2
+supported="linux|darwin|cygwin"
+if [[ ! $OSTYPE =~ $supported ]]; then
+  echo "$OSTYPE is unsuppported" 1>&2
   exit 1
 fi
 
@@ -49,8 +36,7 @@ COLOR_GREEN=$(tput setaf 2)
 
 # Output colorizing
 ECHO_PREFIX=$COLOR_GREEN"»»»"$COLOR_OFF
-if [ "$UNAME" = "Linux" ];
-then
+if [[ $OSTYPE == "linux*" ]]; then
 	ECHO="echo -e $ECHO_PREFIX"
 else
 	ECHO="echo $ECHO_PREFIX"
@@ -62,16 +48,11 @@ log "Configuring Q³"
 log "WARNING: This project is not actively under development"
 log "WARNING: This script will build an old Rust version to run Q³"
 
-if [ "1" -eq "$UNAME_LINUX" ];
-then
-  log "Platform: Linux"
-elif [ "1" -eq "$UNAME_OSX" ];
-then
-  log "Platform: OSX"
-elif [ "1" -eq "$UNAME_CYGWIN" ];
-then
-  log "Platform: Cygwin"
-fi
+case $OSTYPE in
+  linux*) log "Platform: Linux" ;;
+  darwin*) log "Platform: OSX" ;;
+  cygwin*) log "Platform: Cygwin" ;;
+esac
 
 # BWD is the build directory
 BWD=$PWD/build
@@ -85,6 +66,19 @@ function readlink() {
   DIR=$(echo "${1%/*}")
   cd "$DIR"
   link_res=$(pwd -P)
+}
+
+function update() {
+  local ext=""
+  case $OSTYPE in
+    linux* | cygwin*) ext="*.so" ;;
+    darwin*) ext="*.dylib" ;;
+  esac
+
+  rm -f $BWD/../$1-$ext
+  for file in `find build -name $ext`; do
+    cp $file $BWD/../
+  done
 }
 
 # Update submodules
@@ -112,30 +106,10 @@ PATH=$SWD/bin:$PATH
 ## GLFW3 Rust
 log "Building glfw-rs"
 mkdir -p glfw-rs
-pushd glfw-rs
-  pushd $SWD/lib/glfw-rs
-    ln -sf $BWD/glfw_static/libglfw* ./
-    ln -sf $SWD/lib/glfw/src/libglfw* ./
-    touch src/glfw/lib.rs
-    $SWD/bin/rustpkg clean glfw
-    $SWD/bin/rustpkg build glfw
-
-    if [ "0" -eq "$UNAME_LINUX" ] || [ "0" -eq "$UNAME_CYGWIN" ];
-    then
-      # Linux
-      rm -f $BWD/../libglfw-*.so
-      for file in `find build -name '*.so'`; do
-        cp $file $BWD/../
-      done
-    elif [ "0" -eq "$UNAME_OSX" ];
-    then
-      # Mac
-      rm -f $BWD/../libglfw-*.dylib
-      for file in `find build -name '*.dylib'`; do
-        cp $file $BWD/../
-      done
-    fi
-  popd
+pushd $SWD/lib/glfw-rs
+  rustpkg clean glfw
+  rustpkg build glfw
+  update libglfw
 popd
 
 ## OpenGL ES
@@ -154,21 +128,7 @@ mkdir -p gl-rs
 pushd $SWD/lib/gl-rs
   rustpkg clean gl
   rustpkg build --opt-level=3 gl
-  if [ "0" -eq "$UNAME_LINUX" ] || [ "0" -eq "$UNAME_CYGWIN" ];
-  then
-    # Linux
-    rm -f $BWD/../libgl-*.so
-    for file in `find build -name '*.so'`; do
-      cp $file $BWD/../
-    done
-  elif [ "0" -eq "$UNAME_OSX" ];
-  then
-    # Mac
-    rm -f $BWD/../libgl-*.dylib
-    for file in `find build -name '*.dylib'`; do
-      cp $file $BWD/../
-    done
-  fi
+  update libgl
 popd
 
 ## STB-Image
@@ -201,8 +161,7 @@ readlink $SWD/build
 swd_link=$link_res
 readlink $BWD
 bwd_link=$link_res
-if [ "$swd_link" != "$bwd_link" ];
-then
+if [[ $swd_link != $bwd_link ]]; then
   # Link the data directory, since this is an out of source build
   ln -sf $SWD/data data
 fi
