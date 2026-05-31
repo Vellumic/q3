@@ -1,15 +1,17 @@
 Q³
 ===
-(**NOTE**: q3 should build on Rust f4bedde)
 ![Screenshot](pics/012_1_no_wire.png)
 
-### What is Q³?
-Q³ is a project using Mozilla's Rust language and OpenGL to create a Quake 3 like game that takes 
-Quake 3 and QuakeLive maps, voxelizes them, and allows groups of players to blow the shit out 
-of everything in a fast-paced Quake-esque first person shooter with 100% destructible environments.
+> [!WARNING]
+> This fork fixes current state of the project to make it successfully build & run on modern systems. There are no plans to continue its development.
 
-### What's the current state of Q³?
-Q³ is not a game yet! It's still a side project that I'm working on in my spare time.  
+### What is Q³?
+Q³ is a project using Rust language and OpenGL to create a Quake 3 like game that takes
+Quake 3 and QuakeLive maps, voxelizes them, and allows groups of players to blow the shit out
+of everything in a fast-paced Quake-esque first person shooter with 100% destructible environments.
+However, it's an engine with some features (listed below) rather than a game.
+
+### Which features Q³ has?
 * Multithreaded OpenGL rendering
 * Half-baked BSP renderer (Quake 3 and Quake Live)
   * Quake Live map rendering is... buggy
@@ -20,32 +22,29 @@ Q³ is not a game yet! It's still a side project that I'm working on in my spare
   * Using Separating Axis Theorem and instance rendering
 * Basic UI with drop-down console that provides in-game tweaking/debugging
   * See [Console](https://github.com/jeaye/q3/wiki/Console)
-* Tested on Linux and Mac OS X
 * [Documentation on a wiki](https://github.com/jeaye/q3/wiki)
 
 ### How do I get Q³ running on my system?
-I run on the (nearly) latest Rust master; I generally pull every few days. Q³ currently has
-[glfw-rs](https://github.com/jeaye/glfw-rs), 
-[rust-opengles](https://github.com/jeaye/rust-opengles),
-[rust-stb-image](https://github.com/mozilla-servo/rust-stb-image), and
-[ncurses-rs](https://github.com/jeaye/ncurses-rs),
-as submodules. To configure, simply run (in source and out of source builds are acceptable):  
+
+> [!NOTE]
+> Tested only on Linux.
+>
+> Ensure that you have FreeType 2, Python 2.7, and GLFW3 installed.
+
+For initial setup, run:
 ```bash
 ./configure
 ```
-From there, you should be able to compile and run a release build with:  
+From there, you should be able to compile and run a release build with:
 ```bash
-make && ./bin/client
+make && TERM=dumb ./bin/client
 ```
-The server can be executed via:  
+The server can be executed via:
 ```bash
-./bin/server
+TERM=dumb ./bin/server
 ```
-You may also individually build server/client or specify a debug build:  
+You may also individually build server/client or specify a debug build:
 ```bash
 make server && make client # Make either separately
 make MODE=debug # Debug symbols and faster compilation
 ```
-**NOTE:** Ensure that you have Freetype2 installed.  
-**NOTE:** I don't have access to a Windows machine at the moment, so I'm not sure yet what will go into building 
-this under something like MinGW. This should be coming with r0.3, as per [#26](https://github.com/jeaye/q3/issues/26).
